@@ -22,6 +22,13 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+  # ... vos configs existantes (application name, datasource...) ...
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/sd-conference
+          jwk-set-uri: http://localhost:8080/realms/sd-conference/protocol/openid-connect/certs
 
 eureka:
   client:

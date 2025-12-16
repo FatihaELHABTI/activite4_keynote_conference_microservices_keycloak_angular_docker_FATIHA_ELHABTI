@@ -1,9 +1,16 @@
-<!-- Barre de navigation simple -->
-<nav style="background-color: #007bff; padding: 15px; margin-bottom: 20px;">
+<nav style="background-color: #007bff; padding: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; color: white;">
+
   <a routerLink="/conferences" style="color: white; text-decoration: none; font-weight: bold; font-size: 18px;">
     🏠 Conference App
   </a>
+
+  <div>
+    <!-- On va gérer l'utilisateur et le logout dans le TS -->
+    <span style="margin-right: 15px;">👤 Bonjour, <strong>{{ username }}</strong></span>
+    <button (click)="logout()" style="background-color: #dc3545; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 4px;">
+      Déconnexion
+    </button>
+  </div>
 </nav>
 
-<!-- C'est ici que les composants (comme ConferencesComponent) vont s'afficher -->
 <router-outlet></router-outlet>
