@@ -1,44 +1,136 @@
-<div class="container" style="padding: 20px; font-family: Arial, sans-serif;">
-  <h2>Gestion des Conférences</h2>
+<div class="glass-container">
 
-  <!-- Message d'erreur s'il y en a un -->
-  <div *ngIf="errorMessage" style="background-color: #ffcccc; color: red; padding: 10px; margin-bottom: 10px; border: 1px solid red;">
-    {{ errorMessage }}
+  <!-- ========================================= -->
+  <!-- 1. EN-TÊTE (TITRE + BOUTON AJOUT)         -->
+  <!-- ========================================= -->
+  <div class="header-section" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+    <div>
+      <h1 style="margin: 0; color: var(--primary-color);">📅 Conférences</h1>
+      <p style="margin: 0; color: #666;">Gérez les événements à venir</p>
+    </div>
+
+    <!-- Bouton Ajouter (Visible seulement pour ADMIN) -->
+    <!-- On appelle toggleForm() sans argument pour le mode Création -->
+    <button *ngIf="isAdmin" class="btn-custom" (click)="toggleForm()">
+      <span style="font-size: 1.2em;">+</span> Nouvelle Conférence
+    </button>
   </div>
 
-  <table border="1" style="width: 100%; border-collapse: collapse; text-align: left;">
-    <thead>
-    <tr style="background-color: #333; color: white;">
-      <th style="padding: 8px;">ID</th>
-      <th style="padding: 8px;">Titre</th>
-      <th style="padding: 8px;">Type</th>
-      <th style="padding: 8px;">Date</th>
-      <th style="padding: 8px;">Score</th>
-      <th style="padding: 8px;">Speaker (Keynote)</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr *ngFor="let c of conferences">
-      <td style="padding: 8px;">{{ c.id }}</td>
-      <td style="padding: 8px; font-weight: bold;">{{ c.titre }}</td>
-      <td style="padding: 8px;">
-            <span [style.color]="c.type === 'Academique' ? 'blue' : 'green'">
-                {{ c.type }}
-            </span>
-      </td>
-      <td style="padding: 8px;">{{ c.date | date:'dd/MM/yyyy' }}</td>
-      <td style="padding: 8px;">{{ c.score }} / 5</td>
-      <td style="padding: 8px;">
-        <!-- Utilisation du Safe Navigation Operator (?) pour éviter le crash si keynote est null -->
-        <div *ngIf="c.keynote; else noKeynote">
-          <strong>{{ c.keynote.prenom }} {{ c.keynote.nom }}</strong><br>
-          <small>{{ c.keynote.fonction }}</small>
+  <!-- ========================================= -->
+  <!-- 2. FORMULAIRE (AJOUT / MODIFICATION)      -->
+  <!-- ========================================= -->
+  <div *ngIf="showForm" class="form-section" style="background: #f8f9fa; padding: 20px; border-radius: 15px; margin-bottom: 30px; border: 1px solid #ddd; box-shadow: 0 5px 15px rgba(0,0,0,0.05);">
+    <h3 style="color: var(--primary-color); margin-top: 0;">
+      {{ isEditMode ? '✏️ Modifier la Conférence' : '✨ Nouvelle Conférence' }}
+    </h3>
+
+    <form (ngSubmit)="onSubmit()">
+      <!-- Grille du formulaire -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+
+        <!-- Ligne 1 : Titre et Type -->
+        <input class="input-custom" placeholder="Titre de la conférence" [(ngModel)]="newConf.titre" name="titre" required>
+
+        <select class="input-custom" [(ngModel)]="newConf.type" name="type">
+          <option value="Academique">Académique</option>
+          <option value="Commerciale">Commerciale</option>
+        </select>
+
+        <!-- Ligne 2 : Date et Durée -->
+        <input class="input-custom" type="date" [(ngModel)]="newConf.date" name="date" required>
+
+        <input class="input-custom" type="number" placeholder="Durée (en minutes)" [(ngModel)]="newConf.duree" name="duree" required>
+
+        <!-- Ligne 3 : Inscrits et Score -->
+        <input class="input-custom" type="number" placeholder="Nombre d'inscrits" [(ngModel)]="newConf.nombreInscrits" name="nombreInscrits">
+
+        <input class="input-custom" type="number" placeholder="Score (0 à 5)" step="0.1" max="5" [(ngModel)]="newConf.score" name="score">
+
+        <!-- Ligne 4 : Sélection du Speaker (Prend toute la largeur) -->
+        <select class="input-custom" [(ngModel)]="newConf.keynoteId" name="keynoteId" required style="grid-column: span 2;">
+          <option [ngValue]="null" disabled>-- Choisir un Speaker (Keynote) --</option>
+          <!-- Utilisation de ngValue pour garder le type Number de l'ID -->
+          <option *ngFor="let k of keynotes" [ngValue]="k.id">
+            {{ k.prenom }} {{ k.nom }} ({{ k.fonction }})
+          </option>
+        </select>
+
+      </div>
+
+      <!-- Boutons du formulaire -->
+      <div style="margin-top: 20px; text-align: right;">
+        <button type="button" (click)="toggleForm()" style="margin-right: 10px; background: #999;" class="btn-custom">
+          Annuler
+        </button>
+        <button type="submit" class="btn-custom">
+          {{ isEditMode ? 'Enregistrer les modifications' : 'Créer la conférence' }}
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- ========================================= -->
+  <!-- 3. LISTE DES CARTES (GRID)                -->
+  <!-- ========================================= -->
+  <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 25px;">
+
+    <div *ngFor="let c of conferences" class="conf-card">
+
+      <!-- Badge Type (Coin haut droit) -->
+      <div class="conf-type" [class.commercial]="c.type === 'Commerciale'">
+        {{ c.type }}
+      </div>
+
+      <!-- Titre Cliquable (Vers Détails/Reviews) -->
+      <h3 class="conf-title"
+          [routerLink]="['/conferences', c.id]"
+          style="cursor: pointer; color: var(--primary-color); text-decoration: underline; text-decoration-color: #ddd;">
+        {{ c.titre }}
+      </h3>
+
+      <!-- Infos principales -->
+      <div class="conf-details">
+        <span>⏱ {{ c.duree }} min</span>
+        <span>📅 {{ c.date | date:'dd MMM yyyy' }}</span>
+      </div>
+
+      <!-- Infos secondaires (Score & Inscrits) -->
+      <div style="font-size: 0.9em; color: #555; margin-bottom: 15px; display: flex; justify-content: space-between; padding-bottom: 10px; border-bottom: 1px solid #f0f0f0;">
+        <span>👥 <strong>{{ c.nombreInscrits || 0 }}</strong> inscrits</span>
+        <span style="font-weight: bold; color: #f39c12;">★ {{ c.score || 0 }} / 5</span>
+      </div>
+
+      <!-- Section Speaker (Avatar + Nom) -->
+      <div class="keynote-section">
+        <div *ngIf="c.keynote; else noKeynote" style="display: flex; align-items: center;">
+          <div class="avatar">{{ c.keynote.prenom.charAt(0) }}{{ c.keynote.nom.charAt(0) }}</div>
+          <div style="margin-left: 10px;">
+            <div style="font-weight: bold;">{{ c.keynote.prenom }} {{ c.keynote.nom }}</div>
+            <div style="font-size: 0.8em; color: #777;">{{ c.keynote.fonction }}</div>
+          </div>
         </div>
         <ng-template #noKeynote>
-          <span style="color: orange; font-style: italic;">⚠ Service indisponible</span>
+          <span style="color: #999; font-style: italic;">⚠️ Speaker non assigné</span>
         </ng-template>
-      </td>
-    </tr>
-    </tbody>
-  </table>
+      </div>
+
+      <!-- Actions Admin (Modifier / Supprimer) -->
+      <div class="conf-actions" *ngIf="isAdmin" style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px;">
+
+        <!-- Bouton EDITER -->
+        <button class="btn-custom"
+                style="padding: 5px 15px; font-size: 0.9em; background: linear-gradient(to right, #f39c12, #e67e22);"
+                (click)="toggleForm(c)">
+          ✏️ Modifier
+        </button>
+
+        <!-- Bouton SUPPRIMER -->
+        <button class="btn-danger-custom" (click)="deleteConf(c.id)">
+          🗑️ Supprimer
+        </button>
+      </div>
+
+    </div>
+
+  </div>
 </div>

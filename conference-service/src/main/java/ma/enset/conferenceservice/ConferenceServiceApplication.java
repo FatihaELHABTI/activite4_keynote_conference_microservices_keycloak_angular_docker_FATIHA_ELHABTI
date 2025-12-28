@@ -31,7 +31,7 @@ public class ConferenceServiceApplication {
             Conference c1 = Conference.builder()
                     .titre("Architecture Micro-services avec Spring Cloud")
                     .type("Academique")
-                    .date(new Date())
+                    .date(java.time.LocalDate.now())
                     .duree(120)
                     .nombreInscrits(150)
                     .score(4.8)
@@ -42,7 +42,7 @@ public class ConferenceServiceApplication {
             Conference c2 = Conference.builder()
                     .titre("Big Data Analytics en Temps Réel")
                     .type("Commerciale")
-                    .date(new Date())
+                    .date(java.time.LocalDate.now())
                     .duree(90)
                     .nombreInscrits(200)
                     .score(4.5)
@@ -52,14 +52,14 @@ public class ConferenceServiceApplication {
 
             // 2. Création de Reviews pour la conférence 1
             reviewRepository.save(Review.builder()
-                    .date(new Date())
+                    .date(java.time.LocalDate.now())
                     .texte("Conférence très intéressante et bien expliquée !")
                     .stars(5)
                     .conference(c1)
                     .build());
 
             reviewRepository.save(Review.builder()
-                    .date(new Date())
+                    .date(java.time.LocalDate.now())
                     .texte("Bon contenu mais un peu long.")
                     .stars(4)
                     .conference(c1)
@@ -67,7 +67,7 @@ public class ConferenceServiceApplication {
 
             // 3. Création de Reviews pour la conférence 2
             reviewRepository.save(Review.builder()
-                    .date(new Date())
+                    .date(java.time.LocalDate.now())
                     .texte("Exemples concrets pertinents.")
                     .stars(5)
                     .conference(c2)

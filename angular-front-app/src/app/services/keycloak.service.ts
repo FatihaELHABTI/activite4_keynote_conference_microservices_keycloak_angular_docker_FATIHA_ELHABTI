@@ -44,4 +44,11 @@ export class KeycloakService {
   get userProfile() {
     return this.keycloak.loadUserProfile();
   }
+  get roles(): string[] {
+    return this.keycloak.realmAccess?.roles || [];
+  }
+
+  hasRole(role: string): boolean {
+    return this.roles.includes(role);
+  }
 }

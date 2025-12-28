@@ -3,6 +3,8 @@ package ma.enset.conferenceservice.entities;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.time.LocalDate;
 import java.util.Date;
 
 @Entity
@@ -10,9 +12,9 @@ import java.util.Date;
 public class Review {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Date date;
+    private LocalDate date;;
     private String texte;
-    private int stars;
+    private Integer stars;
 
     @ManyToOne
     @JsonIgnore

@@ -1,0 +1,74 @@
+<div class="glass-container" *ngIf="conference">
+
+  <!-- Bouton Retour -->
+  <a routerLink="/conferences" class="btn-custom" style="margin-bottom: 20px; background: #999; padding: 8px 15px; font-size: 0.9em;">
+    ⬅ Retour
+  </a>
+
+  <!-- En-tête Conférence -->
+  <div style="border-bottom: 1px solid #ddd; padding-bottom: 20px; margin-bottom: 20px;">
+    <div style="display: flex; justify-content: space-between; align-items: start;">
+      <h1 style="margin: 0; color: var(--primary-color);">{{ conference.titre }}</h1>
+      <span class="badge" [ngStyle]="{'background': conference.type === 'Academique' ? '#3498db' : '#27ae60'}"
+            style="color: white; padding: 5px 10px; border-radius: 5px;">
+        {{ conference.type }}
+      </span>
+    </div>
+
+    <div style="margin-top: 15px; color: #555;">
+      <p>📅 Date : <strong>{{ conference.date | date:'fullDate' }}</strong></p>
+      <p>⏱ Durée : <strong>{{ conference.duree }} minutes</strong></p>
+      <p>🎤 Speaker :
+        <strong *ngIf="conference.keynote">{{ conference.keynote.prenom }} {{ conference.keynote.nom }}</strong>
+        <span *ngIf="!conference.keynote" style="color: red;">Non assigné</span>
+      </p>
+    </div>
+  </div>
+
+  <!-- Section Avis -->
+  <h3>📝 Avis et Commentaires ({{ conference.reviews ? conference.reviews.length : 0 }})</h3>
+
+  <!-- Liste des avis existants -->
+  <div style="max-height: 400px; overflow-y: auto; margin-bottom: 30px;">
+
+    <div *ngFor="let r of conference.reviews"
+         style="background: rgba(255,255,255,0.6); padding: 15px; border-radius: 10px; margin-bottom: 10px; border-left: 4px solid var(--primary-color);">
+      <div style="display: flex; justify-content: space-between;">
+        <div style="color: #f39c12; font-size: 1.2em;">
+          {{ '★'.repeat(r.stars) }}<span style="color: #ccc;">{{ '★'.repeat(5 - r.stars) }}</span>
+        </div>
+        <small style="color: #888;">{{ r.date | date }}</small>
+      </div>
+      <p style="margin: 5px 0; font-style: italic;">"{{ r.texte }}"</p>
+    </div>
+
+    <div *ngIf="!conference.reviews || conference.reviews.length === 0" style="color: #777; text-align: center; padding: 20px;">
+      Aucun avis pour le moment. Soyez le premier à donner votre opinion !
+    </div>
+
+  </div>
+
+  <!-- Formulaire d'ajout d'avis -->
+  <div style="background: #f8f9fa; padding: 20px; border-radius: 15px; border: 1px solid #eee;">
+    <h4 style="margin-top: 0;">Laisser un avis</h4>
+
+    <div style="margin-bottom: 15px;">
+      <label style="display: block; margin-bottom: 5px;">Note :</label>
+      <select [(ngModel)]="newReview.stars" class="input-custom" style="width: 150px;">
+        <option [ngValue]="5">5 ★★★★★ (Excellent)</option>
+        <option [ngValue]="4">4 ★★★★ (Très bien)</option>
+        <option [ngValue]="3">3 ★★★ (Moyen)</option>
+        <option [ngValue]="2">2 ★★ (Bof)</option>
+        <option [ngValue]="1">1 ★ (Mauvais)</option>
+      </select>
+    </div>
+
+    <div style="margin-bottom: 15px;">
+      <label style="display: block; margin-bottom: 5px;">Commentaire :</label>
+      <textarea [(ngModel)]="newReview.texte" class="input-custom" rows="3" placeholder="Qu'avez-vous pensé de cette conférence ?"></textarea>
+    </div>
+
+    <button class="btn-custom" (click)="submitReview()">Publier mon avis</button>
+  </div>
+
+</div>

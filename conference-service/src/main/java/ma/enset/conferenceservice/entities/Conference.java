@@ -1,8 +1,11 @@
 package ma.enset.conferenceservice.entities;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
 import ma.enset.conferenceservice.model.Keynote; // Voir plus bas
+
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -13,16 +16,16 @@ public class Conference {
     private Long id;
     private String titre;
     private String type;
-    @Temporal(TemporalType.DATE)
-    private Date date;
-    private int duree;
-    private int nombreInscrits;
-    private double score;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate date;
+    private Integer duree;
+    private Integer nombreInscrits;
+    private Double score;
     private Long keynoteId; // ID externe
 
     @Transient // Pas persisté en base
     private Keynote keynote;
 
-    @OneToMany(mappedBy = "conference")
+    @OneToMany(mappedBy = "conference", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviews;
 }
